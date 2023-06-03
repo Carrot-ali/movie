@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+  <script src="js/jquery-1.9.1.js"></script>
+  <script src="js/vue.js"></script>
+  <script src="js/axios.js"></script>
+  <!-- 引入样式 -->
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+  <!-- 引入组件库 -->
+  <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+</head>
+<body>
+    <div id="main">
+        <div id='topselect' style="margin-top: 30px">
+            <div style="float: left;margin-left: 20px">
+                <el-select v-model="value" placeholder="所在部门">
+                    <el-option
+                            v-for="item in options"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value">
+                    </el-option>
+                </el-select>
+                <el-select v-model="value" placeholder="拥有权限" style="margin-left: 20px">
+                    <el-option
+                            v-for="item in options"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value">
+                    </el-option>
+                </el-select>
+            </div>
+            <div style="float: right;margin-right: 20px">
+                <el-input v-model="input" placeholder="精准搜索" prefix-icon="el-icon-user" style="width: 200px"></el-input>
+                <el-button type="primary" icon="el-icon-search" style="margin-left: 20px">搜索</el-button>
+            </div>
+        </div>
+        <div style="border-bottom:0.5px solid gray;width: 1000px;height: 20px;float: left;margin-left:60px">
+        </div>
+        <div id="utable" style="width: 90%;margin: auto;text-align: center">
+            <el-table
+                    :data="tableData"
+                    style="width: 100%">
+                <el-table-column
+                        prop="Uid"
+                        label="员工id"
+                        width="300">
+                </el-table-column>
+                <el-table-column
+                        prop="name"
+                        label="员工姓名"
+                        width="300">
+                </el-table-column>
+                <el-table-column
+                        prop="level"
+                        label="等级权限"
+                        width="300">
+                </el-table-column>
+                <el-table-column>
+                    <el-link type="primary">修改</el-link>
+                </el-table-column>
+            </el-table>
+        </div>
+    </div>
+</body>
+<script>
+    var vue = new Vue({
+        el:'#main',
+        data:{
+            options: [{
+                value: '选项1',
+                label: '黄金糕'
+            }, {
+                value: '选项2',
+                label: '双皮奶'
+            }, {
+                value: '选项3',
+                label: '蚵仔煎'
+            }, {
+                value: '选项4',
+                label: '龙须面'
+            }, {
+                value: '选项5',
+                label: '北京烤鸭'
+            }],
+            value: '',
+        tableData: [{
+            Uid: '100001',
+            name: '王小虎',
+            level: '3'
+        }, {
+            Uid: '100002',
+            name: '王小强',
+            level: '4'
+        }, {
+            Uid: '100003',
+            name: '王小刚',
+            level: '1'
+        }, {
+            Uid: '100004',
+            name: '王小张',
+            level: '2'
+        }]
+        }
+    })
+</script>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+  <script src="../js/jquery-1.9.1.js"></script>
+  <script src="../js/vue.js"></script>
+  <script src="../js/axios.js"></script>
+  <!-- 引入样式 -->
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+  <!-- 引入组件库 -->
+  <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+</head>
+<body>
+  <div id="main" style="display: flex">
+    <el-input size="mid" v-model="code" style="width: 200px"></el-input>
+    <span @click="refreshCode" style="cursor: pointer; flex: 1;">
+      <Identify :identifyCode="ideCode"></Identify>
+    </span>
+</div>
+</body>
+<script>
+  var vue = new Vue({
+    el:"#main",
+    data:{
+      code: '',
+      // 图片验证码
+      ideCode: '',
+      // 验证码规则
+      ideCodes: '3456789ABCDEFGHGKMNPQRSTUVWXY',
+    },
+    methods:{
+      login() {
+        //验证二维码是否正确
+        if (this.code !==
+                this.ideCode.toLowerCase()) {
+          this.$message({
+            type: "error",
+            message: "验证码错误"
+          })
+          return;
+        }
+    //请求登录接口
+      },
+    // 切换验证码
+    refreshCode() {
+      this.ideCode = ''
+      this.makeCode(this.ideCodes, 4)
+    },
+  // 生成随机验证码
+    makeCode(o, l) {
+        for (let i = 0; i < l; i++) {
+          this.ideCode +=
+                  this.ideCodes[Math.floor(Math.random() * (this.ideCodes.length))]
+        }
+      }
+    }
+  })
+</script>
+</html>

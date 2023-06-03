@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+  <script src="../js/jquery-1.9.1.js"></script>
+  <script src="../js/vue.js"></script>
+  <script src="../js/axios.js"></script>
+  <!-- 引入样式 -->
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+  <!-- 引入组件库 -->
+  <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+  <meta name="referrer" content="no-referrer">
+
+<style>
+  #movediv{
+    position:fixed;
+    top:54%
+  }
+  #left{
+    position:relative;
+  }
+  #left .el-rate__icon{
+    font-size: 30px
+  }
+  .el-menu-item{
+    width: 120px;
+    text-align: center;
+  }
+</style>
+  <script src="js/getUrlParam.js"></script>
+</head>
+<body>
+<div id="app">
+  <el-menu
+          class="el-menu-demo"
+          mode="horizontal"
+          background-color="#545c64"
+          text-color="#fff"
+          active-text-color="#ffd04b">
+    <el-menu-item index="1" ><a href="userMain.html">首页</a></el-menu-item>
+    <el-menu-item index="2" ><a href="movieAll.html">电影</a></el-menu-item>
+    <el-menu-item index="3" ><a href="filmReview.html">影评</a></el-menu-item>
+    <el-menu-item index="4" style="float:right;">个人中心</el-menu-item>
+  </el-menu>
+</div>
+<div id="main" style="width: 90%;height: 1800px;margin: auto;margin-top: 20px">
+  <div id="left" style="float: left;width: 80%">
+    <div id="toptitle" style="margin-left: 30px">
+      <h2>{{review.comname}}</h2>
+      <el-rate
+              v-model="review.rate"
+              disabled
+              text-color="#ff9900"
+              score-template="{value}"
+              style="float: left"
+      >
+      </el-rate>
+      <i style="color: #c9c9c9;margin-left: 30px;font-size: 19px">{{review.contime}}</i>
+    </div>
+    <div style="border-bottom: #8e9ba3 solid 1px;width: 80%;height: 20px"></div>
+  <div id="maintext" >
+    <div id="tips"
+         style="background-color: #c9c9c9;
+         color: #696969;width: 70%;margin-left: 40px;
+         margin-top: 20px;text-indent:35px;padding: 15px" >
+      <i>{{review.tips}}</i>
+    </div>
+    <div style="height: 20px"></div>
+    <div id="text" style="text-indent:35px;width: 76%;margin-left: 30px">
+      {{review.content}}
+    </div>
+  </div>
+  </div>
+  <div id="right" style="float: right;width: 20%;background-color:#cecece">
+    <h3 style="margin-left: 10px">作者信息</h3>
+    <div class="block" style="margin-top: 20px;width: 155px;margin: auto"><el-avatar shape="square" :size="150" :src="author.sculpture"></el-avatar></div>
+    <div style="margin: auto;width: 130px;text-align: center">
+      {{author.name}}
+      <el-button v-if="start==true" type="warning" icon="el-icon-star-off" circle @click="click"></el-button>
+      <el-button v-if="start==false"  icon="el-icon-star-off" circle @click="click"></el-button>
+    </div>
+    <div style="width: 150px ;margin: auto;text-align: center">
+      <p>籍&nbsp;&nbsp;&nbsp;&nbsp;贯&nbsp;:&nbsp;{{author.natives}}</p>
+      <p>用户i&nbsp;&nbsp;d&nbsp;:&nbsp;{{author.id}}</p>
+    </div>
+    <div id="movediv" style="margin-left: 30px">
+      <a @click="gotothemovie()">>>{{movie.name}} </a><br>
+      <img :src="movie.page" style="width: 90px;height:140px;margin-top: 10px">
+      <p>导演:{{movie.direct}}</p>
+      <p>地区:{{movie.mlocal}}</p>
+      <p>类型:{{movie.mlable}}</p>
+      <p>时长:{{movie.longtime}}</p>
+    </div>
+  </div>
+</div>
+</body>
+<script>
+  var vue=new Vue({
+    el:'#app',
+  })
+  var vue = new Vue({
+    el:"#main",
+    data:{
+      review:[],
+      author:[],
+      movie:[],
+      start:true,
+      comid:""
+    },
+    methods:{
+      click(){
+        this.start=!this.start
+      },
+      getallmath(){
+        var par = new URLSearchParams()
+        axios.post("atributegetcommen",par).then(d=>{
+          this.comid = d.data
+          var params = new URLSearchParams()
+          params.append("comid",this.comid)
+          axios.post("getcomm",params).then(d=>{
+            this.review = d.data.data[0];
+            var getvue = this.review.coauthor
+            var params1 = new URLSearchParams()
+            params1.append("authorid",getvue)
+            axios.post("getcomauthor",params1).then(d=>{
+              this.author=d.data.data[0]
+            })
+            var params2 = new URLSearchParams()
+            var getmo = this.review.cowork
+            console.log(this.review)
+            console.log(this.review.cowork)
+            params2.append("mid",getmo)
+            axios.post("getmoviebyid",params2).then(d=>{
+              this.movie=d.data.data[0]
+            })
+          })
+        })
+      },
+      gotothemovie(){
+        var params = new URLSearchParams()
+        params.append("id",this.movie.id)
+        axios.post("atributethemovie",params).then(d=>{
+          window.location.href="FilmMain.html"
+        })
+      }
+    },
+    mounted:function(){
+      this.getallmath()
+    }
+  })
+</script>
+</html>

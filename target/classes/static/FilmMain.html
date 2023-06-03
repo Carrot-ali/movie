@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+  <script src="js/jquery-1.9.1.js"></script>
+  <script src="js/vue.js"></script>
+  <script src="js/axios.js"></script>
+  <!-- 引入样式 -->
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+  <!-- 引入组件库 -->
+  <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+
+  <style scoped>
+
+    .film-header {
+      position: relative;
+      width: 100%;
+      height: 380px;
+      background: #5a84fd;
+      margin-top: 12px;
+    }
+
+    .film-content {
+      padding: 80px 200px;
+      letter-spacing: 2px;
+    }
+
+    .p1 {
+      font-weight: bolder;
+      letter-spacing: 3px;
+      color: #FFFFFF;
+      font-size: 30px;
+      padding-top: 20px;
+      padding-bottom: 10px;
+    }
+
+    .p2 {
+      font-size: 14px;
+      padding-top: 20px;
+      letter-spacing: 2px;
+      color: #FFFFFF;
+    }
+
+    .film-card {
+      width: 240px;
+      height: 330px;
+      background: #FFFFFF;
+      margin-right: 100px;
+      margin-left: 190px;
+      position: absolute;
+      overflow: hidden;
+      top: 160px;
+      z-index: 999;
+    }
+
+    .film-des {
+      margin-left: 500px;
+      position: absolute;
+      overflow: hidden;
+      top: 150px;
+      z-index: 999;
+    }
+
+    >>> .el-rate__icon {
+      font-size: 25px;
+    }
+
+    >>> .el-rate__text {
+      padding-left: 8px;
+      font-size: 30px;
+    }
+    .el-menu-item{
+      width: 120px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+  <el-menu
+          class="el-menu-demo"
+          mode="horizontal"
+          background-color="#545c64"
+          text-color="#fff"
+          active-text-color="#ffd04b">
+    <el-menu-item index="1" ><a href="userMain.html">首页</a></el-menu-item>
+    <el-menu-item index="2" ><a href="movieAll.html">电影</a></el-menu-item>
+    <el-menu-item index="3" ><a href="filmReview.html">影评</a></el-menu-item>
+    <el-menu-item index="4" style="float:right;">个人中心</el-menu-item>
+  </el-menu>
+</div>
+<div id="main">
+  <div class="film">
+
+    <div class="film-header">
+    </div>
+
+    <div class="film-card">
+      <img alt="" style="width: 100%;height: 100%" :src="film.page">
+    </div>
+
+    <div class="film-des">
+      <div class="p1">{{ film.name }}
+        <el-rate style="float: right;padding-left: 50px"
+                 v-model="value"
+                 disabled
+                 show-score
+                 text-color="#ff9900"
+                 score-template="{value}">
+        </el-rate>
+      </div>
+      <div class="p2">电影类型 : {{ film.mlable }}</div>
+      <div class="p2">{{ film.region }} / {{ film.longtime }}分钟</div>
+      <div class="p2">上映日期 : {{ film.time }} 上映</div>
+      <div style="padding-top: 30px">
+        <router-link style="margin-right: 20px" :to="'/film/ticket?fid=' + filmId">
+          <el-button type="danger" style="width: 130px;letter-spacing: 2px">
+            <i style="padding-right: 5px;font-size: 15px" class="el-icon-s-finance"></i>特惠购票
+          </el-button>
+        </router-link>
+        <el-button @click="openComment" type="danger" style="width: 130px;letter-spacing: 2px">
+          <i style="padding-right: 5px;font-size: 15px" class="el-icon-star-on"></i>评分
+        </el-button>
+      </div>
+    </div>
+
+    <div class="film-content">
+      <router-view />
+    </div>
+
+    <el-dialog
+            :show-close=false
+            title="电影评分"
+            :visible.sync="dialogVisible"
+            width="30%">
+      <div class="block">
+        <el-rate
+                v-model="form.star"
+                :colors="colors">
+        </el-rate>
+      </div>
+      <el-input
+              style="margin-top: 40px"
+              type="textarea"
+              :rows="8"
+              placeholder="请输入内容"
+              v-model="form.comment">
+      </el-input>
+      <span slot="footer" class="dialog-footer">
+                <el-button @click="dialogVisible = false">取 消</el-button>
+                <el-button type="primary" @click="submitComment">确 认 提 交</el-button>
+       </span>
+    </el-dialog>
+
+  </div>
+</div>
+</body>
+<script>
+  var vue=new Vue({
+    el:'#app',
+  })
+  var vue = new Vue({
+    el:"#main",
+    data:{
+      value2: null,
+      colors: ['#99A9BF', '#F7BA2A', '#FF9900'],
+      list: [{}, {}, {}],
+      dialogVisible: false,
+      evaluateList: [],
+      value:3.8,
+      form: {
+        fid: '',
+        uid: '',
+        star: 5,
+        comment: '',
+      },
+      film:[],
+      filmid:''
+      },
+    methods: {
+      getmoviemain(){
+        var params = new URLSearchParams()
+        axios.post("atributgetemovie",params).then(d=>{
+          this.filmid = d.data;
+          var params = new URLSearchParams()
+          params.append("mid",this.filmid)
+          axios.post("getmoviebyid",params).then(d=>{
+            this.film = d.data.data[0];
+            console.log(this.film)
+          })
+        })
+      },
+      openComment(){
+        this.dialogVisible=true;
+      },
+      submitComment(){
+        this.dialogVisible=false;
+        this.$message("发表成功")
+      }
+    },
+    mounted:function(){
+      this.getmoviemain()
+    }
+  })
+</script>
+</html>

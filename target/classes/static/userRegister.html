@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+  <script src="js/jquery-1.9.1.js"></script>
+  <script src="js/vue.js"></script>
+  <script src="js/axios.js"></script>
+  <!-- 引入样式 -->
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+  <!-- 引入组件库 -->
+  <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+</head>
+<style>
+    #all{
+        height: 380px;
+        width: 500px;
+        background-color:rgba(255,255,255,0.7);
+        border: solid 4px gray;
+        margin: auto;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+    }
+    #main{
+        height: 280px;
+        width: 350px;
+        margin-left: 110px;
+        margin-top: 60px;
+    }
+    body{
+        background: url(ph/Register.jpg) no-repeat;
+        background-size:100% 100%;
+        background-attachment:fixed;
+    }
+</style>
+<body>
+    <div id="all">
+        <div id="main">
+            <h3 style="font-family: 幼圆;width: 100px;height: 20px;color: gray">注册界面</h3>
+            <el-row style="font-family: 幼圆 ; height: 50px"> <b style="width: 80px">用户名：</b>
+                <el-input placeholder="您的用户名长度需要大于5" v-model="userID" style="margin-left: 8px;width: 200px" ></el-input>
+            </el-row>
+            <el-row style="font-family: 幼圆;height: 50px"> <b style="width: 80px">密&nbsp;&nbsp;码：</b>
+                <el-input placeholder="您的密码长度需大于8" v-model="passWord" style="margin-left: 8px;width: 200px" show-password></el-input>
+            </el-row>
+            <el-row style="font-family: 幼圆;height: 50px"><b style="width: 80px"> 邮&nbsp;&nbsp;箱：</b>
+                <el-input placeholder="请输入您的邮箱" v-model="Email" style="margin-left: 8px;width: 200px" ></el-input>
+                <el-button @click="getverification" type="info" icon="el-icon-message" circle></el-button>
+            </el-row>
+            <el-row style="font-family: 幼圆;height: 50px"> <b style="width: 80px">验证码：</b>
+                <el-input placeholder="请输入您获取的验证码" v-model="Verification" style="margin-left: 8px;width: 200px" ></el-input>
+            </el-row>
+            <el-row><el-button type="info" @click="addnewuser" plain style="width: 110px;float: right;margin-right: 70px">注&nbsp;&nbsp;册</el-button></el-row>
+        </div>
+    </div>
+</body>
+<script>
+    var vue = new Vue({
+        el:'#main',
+        data:({
+            userID:'',
+            passWord:'',
+            Email:'',
+            Verification:''
+        }),
+        methods:{
+            addnewuser(){
+                if (this.passWord.length<8 || this.userID.length<6){
+                    this.$message('请检验您的用户或密码长度');
+                }else {
+                    var param = new URLSearchParams();
+                    param.append('uid', this.userID);
+                    param.append('password', this.passWord);
+                    param.append("postbox", this.Email);
+                    param.append("verification",this.Verification);
+                    axios.post('addnewuser', param).then(d => {
+                        if (d) {
+                            this.$message('注册成功');
+                            window.location.href = "userMain.html";
+                        } else {
+                            this.$message('注册失败,请核对信息是否正确或完善');
+                        }
+                    })
+                }
+            },
+            getverification(){
+                var param = new URLSearchParams();
+                param.append("postbox", this.Email);
+                axios.post('postbox',param).then(d=>{
+                    console.log("email get")
+                })
+            }
+        }
+    })
+</script>
+</html>

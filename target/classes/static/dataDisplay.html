@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="js/jquery-1.9.1.js"></script>
+    <script src="js/vue.js"></script>
+    <script src="js/axios.js"></script>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <!-- 引入组件库 -->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <script src="https://gw.alipayobjects.com/os/lib/antv/g2/3.4.10/dist/g2.min.js"></script>
+</head>
+<body>
+    <h3>数据展示</h3>
+    <div id="main">
+        <div id="chart">
+        </div>
+    </div>
+</body>
+<script>
+    var vue = new Vue({
+        el:'#main',
+        data:{
+            mydata:[{ genre: 'Sports', sold: 275,name:'苹果' },
+                { genre: 'Strategy', sold: 115 ,name:'梨子'},
+                { genre: 'Action', sold: 120 ,name:'香蕉'},
+                { genre: 'Shooter', sold: 350 ,name:'菠萝'},
+                { genre: 'Other', sold: 150 ,name:'榴莲'}]
+            // G2 对数据源格式的要求，仅仅是 JSON 数组，数组的每个元素是一个标准 JSON 对象。
+        },
+        methods:{
+            createchart1(){
+                // Step 1: 创建 Chart 对象
+                const chart = new G2.Chart({
+                    container: 'chart', // 指定图表容器 ID
+                    width : 600, // 指定图表宽度
+                    height : 300 // 指定图表高度
+                });
+                // Step 2: 载入数据源
+                chart.source(this.mydata);
+                // Step 3：创建图形语法，绘制柱状图，由 genre 和 sold 两个属性决定图形位置，genre 映射至 x 轴，sold 映射至 y 轴
+                chart.interval().position('name*sold').color('name')
+                // Step 4: 渲染图表
+                chart.render();
+            }
+        },
+        mounted:function() {
+            this.createchart1();
+        }
+    });
+
+</script>
+</html>

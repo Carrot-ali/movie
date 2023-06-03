@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="js/jquery-1.9.1.js"></script>
+    <script src="js/vue.js"></script>
+    <script src="js/axios.js"></script>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <!-- 引入组件库 -->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <style>
+        .el-row{
+            line-height: 50px;
+        }
+        .el-input{
+            width: 400px;
+        }
+    </style>
+</head>
+<body>
+    <div id="main" style="width: 80%;font-family: 幼圆">
+        <div id='topselect' style="margin-top: 30px;height: 50px">
+            <div style="float: left;margin-left: 20px">
+                <el-select v-model="type" multiple-limit="3" multiple placeholder="电影类型" style="width: 250px">
+                    <el-option
+                            style="width: 250px"
+                            v-for="item in options"
+                            :key="item"
+                            :label="item"
+                            :value="item"
+                    >
+                    </el-option>
+                </el-select>
+            </div>
+            <div style="float: right;margin-right: 20px">
+                <el-input v-model="input" placeholder="精准搜索" prefix-icon="el-icon-user" style="width: 200px"></el-input>
+                <el-button type="primary" icon="el-icon-search" style="margin-left: 20px">搜索</el-button>
+            </div>
+        </div>
+        <el-divider style="clear: both;"></el-divider>
+        <div id="down" style="margin-top: 30px">
+            <el-collapse v-model="activeName"  accordion style="height: 500px">
+                <el-collapse-item  v-for="movie in movies" :title="movie.name" :name="movie.id">
+                    <div>
+                        <p>电影id:{{movie.id}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;导演:{{movie.direct}}</p>
+                        <p>简介:{{movie.introduction}}</p>
+                        <p style="margin-left: 70%"><el-button @click="thismovie(movie.id)">查看详情</el-button></p>
+                    </div>
+                </el-collapse-item>
+            </el-collapse>
+        </div>
+        <el-pagination
+                style="margin-left: 20%"
+                background
+                :current-page="pagename"
+                @current-change="addpage"
+                :page-size="5"
+                layout="prev, pager, next"
+                :total="count">
+        </el-pagination>
+
+        <el-dialog title="详细信息" :visible.sync="dialogFormVisible">
+            <div id="thisform">
+                <el-row>电&nbsp;影&nbsp;名:<el-input style="margin-left: 10px" v-model="clickmovie.name" placeholder="请输入内容"></el-input></el-row>
+                <el-row>电影封面:<el-input style="margin-left: 10px" v-model="clickmovie.page" placeholder="请输入内容"></el-input></el-row>
+                <el-row>导&nbsp;&nbsp;&nbsp;&nbsp;演:<el-input style="margin-left: 10px" v-model="clickmovie.direct" placeholder="请输入内容"></el-input></el-row>
+                <el-row>主&nbsp;&nbsp;&nbsp;&nbsp;演:<el-input style="margin-left: 10px" v-model="clickmovie.protagonist" placeholder="请输入内容"></el-input></el-row>
+                <el-row>上映时间:<el-input style="margin-left: 10px" v-model="clickmovie.time" placeholder="请输入内容"></el-input></el-row>
+                <el-row>电影类型:<el-input style="margin-left: 10px" v-model="clickmovie.mlable" placeholder="请输入内容"></el-input></el-row>
+                <el-row>电影时长:<el-input style="margin-left: 10px" v-model="clickmovie.longtime" placeholder="请输入内容"></el-input></el-row>
+                <el-row>电影链接:<el-input style="margin-left: 10px" v-model="clickmovie.mconnect" placeholder="请输入内容"></el-input></el-row>
+                <el-row>电影简介:
+                    <el-input
+                            style="margin-left: 10px;width: 400px"
+                            type="textarea"
+                            :rows="2"
+                            placeholder="请输入内容"
+                            v-model="clickmovie.introduction">
+                    </el-input>
+                </el-row>
+            </div>
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="dialogFormVisible = false">取 消</el-button>
+                <el-button type="primary" @click="dialogFormVisible = false">确 定</el-button>
+            </div>
+        </el-dialog>
+    </div>
+</body>
+<script>
+    var vue = new Vue({
+        el:"#main",
+        data:{
+            activeName: '1',
+            pagename:1,
+            options:[],
+            movies:[],
+            mname:'',
+            mlable:'',
+            type:'',
+            input:'',
+            dialogFormVisible:false,
+            clickmovie:[],
+            count:''
+        },
+        methods:{
+            getmoviebyname(){
+                var params = new URLSearchParams();
+                params.append("ipagename",this.pagename)
+                params.append("mname",this.mname)
+                params.append("mlable",this.mlable)
+                axios.post("Mgetmoviepage",params).then(d=>{
+                    this.movies = d.data.data;
+                })
+            },
+            getalloptions(){
+                var params = new URLSearchParams();
+                axios.post("getoptions",params).then(d=>{
+                    var list = d.data.data;
+                    for(i in list){
+                        this.options.push(list[i].name);
+                    }
+                })
+            },
+            thismovie(index){
+                this.dialogFormVisible = true
+                for (movie in this.movies){
+                    if (this.movies[movie].id == index){
+                        this.clickmovie=JSON.parse(JSON.stringify(this.movies[movie]))
+                        return
+                    }
+                }
+            },
+            getallmoviemath(){
+                var params = new URLSearchParams();
+                axios.post("getintmovie",params).then(d=>{
+                    this.count = d.data;
+                })
+            },
+            addpage(pagename){
+                this.pagename = pagename
+                this.getmoviebyname();
+            }
+        },
+        mounted:function(){
+            this.getalloptions();
+            this.getmoviebyname();
+        }
+    })
+</script>
+</html>

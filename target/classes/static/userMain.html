@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+  <script src="../js/jquery-1.9.1.js"></script>
+  <script src="../js/vue.js"></script>
+  <script src="../js/axios.js"></script>
+  <!-- 引入样式 -->
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+  <!-- 引入组件库 -->
+  <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+</head>
+<style>
+
+  #hot ul {
+      padding: 0px;
+      text-align: center;
+
+  }
+  #hot ul li {
+      display: inline-block;
+      font-size: 8px;
+      margin-left: 25px;
+  }
+  img {
+      width: 180px;
+      height: 280px;
+  }
+  .line{
+      width: 30%;
+      float: left;
+  }
+  .line a{
+      font-size: 16px;
+      color: #409EFF;
+  }
+  .el-menu-item{
+      width: 120px;
+      text-align: center;
+  }
+</style>
+<body >
+<div id="app">
+    <el-menu
+            :default-active="activeIndex2"
+            class="el-menu-demo"
+            mode="horizontal"
+            @select="handleSelect"
+            background-color="#545c64"
+            text-color="#fff"
+            active-text-color="#ffd04b">
+        <el-menu-item index="1" @click="gotothe1"><a href="userMain.html">首页</a></el-menu-item>
+        <el-menu-item index="2" @click="gotothe2"><a href="movieAll.html">电影</a></el-menu-item>
+        <el-menu-item index="3" @click="gotothe3"><a href="userMain.html">影评</a></el-menu-item>
+        <el-menu-item index="4" style="float:right;">个人中心</el-menu-item>
+    </el-menu>
+</div>
+<div id = 'main' style="font-family: 幼圆;margin-top: 40px">
+      <div id="runout" style="margin-bottom: 20px">
+        <el-carousel trigger="click" height="400px" style="width: 50%;margin: auto">
+          <el-carousel-item v-for="item in movies"  style="background-color: aqua">
+            <img style="width: 100%;height: 100%;" :src="item.moviephoto">
+          </el-carousel-item>
+        </el-carousel>
+      </div>
+      <div id="downmain">
+        <div id="leftdown" style="float: left;width: 70%;margin-left: 3%">
+            <div id="hot">
+                <h3 style="margin-left: 5px">个性推荐</h3>
+                <div style="border-bottom: #8c8c8c solid 1px "></div>
+                <ul style="width: 90%;float: left">
+                    <li v-for="item in perfectMovie" :key="item.id">
+                        <img :src="item.page" alt=""><br />
+                        电影名： {{item.name}}<br />
+                        评分： {{item.rate}}<br />
+                        <!-- 链接： {{subject.url}}<br /> -->
+                        ID： {{item.id}}<br />
+                    </li>
+                </ul>
+                <el-button @click="gotoallmovie" icon="el-icon-d-arrow-right" style="height:130px;margin: 85px 45px 0px 0px;float:right;"></el-button>
+            </div>
+            <div id="Zoneselection">
+                <div class="line">
+                    <h3>{{label1}}推荐</h3>
+                    <div style="border-bottom: #8c8c8c solid 1px;width: 80%"></div>
+                    <ul style="width: 70%">
+                        <li v-for="item in label1movies" :key="item.id">
+                            <a >
+                                {{item.name}}/{{item.direct}}
+                            </a>
+                            <a style="float:right">
+                                >>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="line">
+                    <h3>{{label2}}推荐</h3>
+                    <div style="border-bottom: #8c8c8c solid 1px;width: 80%"></div>
+                    <ul style="width: 70%">
+                        <li v-for="item in label2movies" :key="item.id">
+                            <a >
+                                {{item.name}}/{{item.direct}}
+                            </a>
+                            <a style="float:right">
+                                >>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="line">
+                    <h3>{{label3}}推荐</h3>
+                    <div style="border-bottom: #8c8c8c solid 1px;width: 80%"></div>
+                    <ul style="width: 70%">
+                        <li v-for="item in label3movies" :key="item.id">
+                            <a >
+                                {{item.name}}/{{item.direct}}
+                            </a>
+                            <a style="float:right">
+                                >>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div id="Filmreview" style="width: 100%;float:left;">
+                <h3>精选影评</h3>
+
+            </div>
+        </div>
+        <div id="rightdown" style="float: right;width: 25%">
+            <h3>本周口碑</h3>
+            <ul style="width: 70%">
+                <li v-for="item in weekmovie" :key="item.id" style="color: #409EFF;">
+                    <a > {{item.name}} </a>
+                    <a style="float: right"> >> </a>
+                </li>
+            </ul>
+        </div>
+      </div>
+</div>
+</body>
+<script>
+  var vue = new Vue({
+    el:'#main',
+    data:{
+      movies: [],
+      label1movies:[],
+      label2movies:[],
+      label3movies:[],
+      perfectMovie:[],
+      label1:"喜剧",
+      label2:"悬疑",
+      label3:"动作",
+      weekmovie:[]
+      },
+    methods:{
+        getpermovie(){
+            var params = new URLSearchParams()
+            axios.post("getperfectmovie",params).then(d=>{
+                this.movies = d.data.data;
+            })
+        },
+        gotoallmovie(){
+            window.location.href="movieAll.html"
+        },
+        getthreelabel(){
+            // 这里的label可以优先取用户喜好的
+            var params = new URLSearchParams();
+            params.append("label1",this.label1)
+            params.append("label2",this.label2)
+            params.append("label3",this.label3)
+            axios.post("getthreelabel",params).then(d=>{
+                var films = d.data.data
+                for (item in films){
+                    if (films[item].mlable.includes(this.label1)){
+                        if (this.label1.length<8) this.label1movies.push(films[item])
+                    }
+                    if (films[item].mlable.includes(this.label2)){
+                        if (this.label2.length<8) this.label2movies.push(films[item])
+                    }
+                    if (films[item].mlable.includes(this.label3)){
+                        if (this.label3.length<8) this.label3movies.push(films[item])
+                    }
+                }
+            })
+        },
+        getreconmovie(){
+            var params = new URLSearchParams()
+            axios.post("resultAnalyer",params).then(d=>{
+                this.perfectMovie = d.data.data;
+            })
+        },
+        getweekmovie(){
+            var params = new URLSearchParams()
+            axios.post("getweekmovie",params).then(d=>{
+                this.weekmovie = d.data.data;
+            })
+        }
+    },
+      mounted:function(){
+          this.getpermovie()
+          this.getthreelabel()
+          this.getreconmovie()
+          this.getweekmovie()
+
+      }
+  })
+  var vue=new Vue({
+      el:'#app'
+  })
+</script>
+</html>

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+  <script src="../js/jquery-1.9.1.js"></script>
+  <script src="../js/vue.js"></script>
+  <script src="../js/axios.js"></script>
+  <!-- 引入样式 -->
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+  <!-- 引入组件库 -->
+  <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+</head>
+<style>
+    a{
+        text-decoration:none;
+    }
+    li{
+        list-style-type:none;
+    }
+    .el-menu-item{
+        width: 120px;
+        text-align: center;
+    }
+</style>
+<body>
+<div id="app">
+    <el-menu
+            class="el-menu-demo"
+            mode="horizontal"
+            background-color="#545c64"
+            text-color="#fff"
+            active-text-color="#ffd04b">
+        <el-menu-item index="1" ><a href="userMain.html">首页</a></el-menu-item>
+        <el-menu-item index="2" ><a href="movieAll.html">电影</a></el-menu-item>
+        <el-menu-item index="3" ><a href="filmReview.html">影评</a></el-menu-item>
+        <el-menu-item index="4" style="float:right;">个人中心</el-menu-item>
+    </el-menu>
+</div>
+  <div id="main" style="width: 80%;margin: auto;margin-top: 20px">
+     <el-main  style="float: left;width: 70%">
+         <h2>全部影评</h2>
+         <div style="border-bottom: #8e9ba3 solid 1px;height: 10px"></div>
+         <ul>
+           <li v-for="review in reviews" :key="review.comid">
+               <div @click = "addcommen(review.comid)">
+              <h3 style="color: dodgerblue">{{review.comname}}</h3>
+              <p>{{review.tips}}</p>
+              <div style="border-bottom: #8e9ba3 solid 1px;height: 5px"></div>
+               </div>
+           </li>
+         </ul>
+         <el-pagination
+            layout="prev, pager, next"
+            :total=sumreview
+            style="margin: auto;width: 350px"
+         >
+         </el-pagination>
+     </el-main>
+     <el-aside  style="float: right;width: 28%">
+        <h3 style="margin-left: 20px">最近热门</h3>
+         <ul>
+             <li v-for="item in hotres" :key="item.id">
+                 <p>
+                     {{item.name}}
+                     <a :href="item.line" style="float:right;margin-right: 20px;color: dodgerblue">详情>></a>
+                     <div style="border-bottom: #8e9ba3 solid 1px;width: 60%"></div>
+                 </p>
+             </li>
+         </ul>
+     </el-aside>
+
+      <el-backtop :visibility-height='0' @click = "dialogFormVisible = true"></el-backtop>
+
+          <el-dialog title="发表影评" :visible.sync="dialogFormVisible">
+              <el-form :model="form">
+                  <el-form-item label="影评名称" :label-width="formLabelWidth">
+                      <el-input v-model="form.name" autocomplete="off"></el-input>
+                  </el-form-item>
+                  <el-form-item label="评论电影" :label-width="formLabelWidth">
+                      <el-autocomplete
+                              class="inline-input"
+                              v-model="form.state2"
+                              :fetch-suggestions="querySearch"
+                              placeholder="请输入内容"
+                              :trigger-on-focus="false"
+                              @select="handleSelect"
+                      ></el-autocomplete>
+                  </el-form-item>
+                  评论内容：<el-input
+                      type="textarea"
+                      :rows="2"
+                      placeholder="请输入内容"
+                      v-model="form.textarea">
+              </el-input>
+              </el-form>
+              <div slot="footer" class="dialog-footer">
+                  <el-button @click="dialogFormVisible = false">取 消</el-button>
+                  <el-button type="primary" @click="add()">确 定</el-button>
+              </div>
+          </el-dialog>
+
+  </div>
+</body>
+<script>
+    var vue=new Vue({
+        el:'#app',
+    })
+    var vue = new Vue({
+        el:"#main",
+        data:{
+            dialogFormVisible:false,
+            sumreview:10,
+            reviews:[],
+            restaurants:[],
+            form: {
+                name: '',
+                textarea:"",
+                state2:""
+            },
+            hotres:[
+                {
+                    id:1,
+                    name:"我是影评",
+                    line:"https://www.baidu.com/"
+                },
+                {
+                    id:2,
+                    name:"我是影评",
+                    line:"https://www.baidu.com/"
+                }
+            ]
+        },
+        methods:{
+            addcommen(id){
+                var params = new URLSearchParams()
+                console.log(id);
+                params.append("id",id)
+                axios.post("atributecommen",params).then(d=>{
+                    window.location.href="reviewDetail.html"
+                })
+            },
+            getallcommen(id){
+                var params = new URLSearchParams()
+                axios.post("getallcommen",params).then(d=>{
+                    this.reviews = d.data.data;
+                    console.log(this.reviews);
+                })
+            },
+            getallmovie(){
+                var params = new URLSearchParams()
+                axios.post("getmovies",params).then(d=>{
+                    this.restaurants = d.data.data;
+                })
+            },
+            querySearch(queryString, cb) {
+                var restaurants = this.restaurants;
+                var results = queryString ? restaurants.filter(this.createFilter(queryString)) : restaurants;
+                // 调用 callback 返回建议列表的数据
+                cb(results);
+            },
+            createFilter(queryString) {
+                return (restaurant) => {
+                    return (restaurant.value.toLowerCase().indexOf(queryString.toLowerCase()) === 0);
+                };
+            },
+            add(){
+                this.dialogFormVisible = false
+            }
+        },
+        mounted:function(){
+            this.getallcommen();
+        }
+    })
+</script>
+</html>

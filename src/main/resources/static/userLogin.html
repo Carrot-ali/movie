@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <script src="js/jquery-1.9.1.js"></script>
+    <script src="js/vue.js"></script>
+    <script src="js/axios.js"></script>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <!-- 引入组件库 -->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <style>
+        #login{
+            float: right;
+            margin-right: 200px;
+            margin-top: 200px;
+            height: 300px;
+            width: 400px;
+            background-color:rgba(255,255,255,0.95);
+            border: solid 4px gray;
+        }
+        #all {
+            background-image: url("/ph/loginback.png");
+            height: 700px;
+            width: 1450px;
+        }
+        #IDp{
+            margin: 40px;
+            width: 300px;
+        }
+        /*@keyframes move {*/
+        /*}*/
+        #wantlogin{
+            width: 40%;
+            position:fixed;
+            left:30%;
+        }
+    </style>
+</head>
+<body>
+    <div id="all" style="position:relative;">
+        <div id="login">
+            <div id="IDp">
+                <el-row style="font-family: 幼圆"> 用户名： </el-row>
+                <div style="height: 5px"></div>
+                <el-row>
+                    <el-input v-model="userID" placeholder="Please enter your ID" style="margin-left: 15px"></el-input>
+                </el-row>
+                <div style="height: 15px"></div>
+                <el-row style="font-family: 幼圆"> 密码： </el-row>
+                <div style="height: 5px"></div>
+                <el-row>
+                    <el-input placeholder="Please enter password" v-model="password" style="margin-left: 15px" show-password></el-input>
+                </el-row>
+                <div style="height: 20px"></div>
+                <el-row>
+                    <el-button type="info" @click="getloguser" style="float: right;width: 120px">登 陆</el-button>
+                </el-row>
+                <div style="height: 4px"></div>
+                <el-row><el-link @click="newuser" type="primary" style="float: right">我要注册</el-link></el-row>
+                <div style="height: 4px"></div>
+                <el-row><el-link @click="forget" type="primary" style="float: right">忘记密码</el-link></el-row>
+            </div>
+        </div>
+    </div>
+
+</body>
+<script>
+    var vue = new Vue({
+        el:'#all',
+        data:{
+            userID:'',
+            password:'',
+            islogin:null
+        },
+        methods:{
+            getloguser(){
+                var params = new URLSearchParams();
+                params.append("uid",this.userID);
+                params.append("password",this.password);
+                axios.post("userloging",params).then(d=>{
+                    if(d.data){
+                        window.location.href="userMain.html"
+                    }else{
+                        this.password='';
+                        this.$message('请检验您的用户或密码');
+                    }
+                })
+            },
+            forget(){
+                window.location.href="forgetPassword.html"
+            },
+            newuser(){
+                window.location.href="userRegister.html"
+            }
+        }
+    })
+</script>
+</html>

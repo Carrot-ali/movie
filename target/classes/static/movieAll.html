@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="../js/jquery-1.9.1.js"></script>
+    <script src="../js/vue.js"></script>
+    <script src="../js/axios.js"></script>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <!-- 引入组件库 -->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+</head>
+<style>
+    a{
+        font-size: 16px;
+    }
+    .sty{
+        border: #8e9ba3 solid 1px;
+        height: 100px;
+        width: 80%;
+        margin: auto;
+    }
+    .sty a:active{
+        color: white;
+    }
+    #main ul {
+        padding: 0px;
+        text-align: center;
+
+    }
+    #main ul li {
+        display: inline-block;
+        font-size: 8px;
+        margin-left: 10px;
+        padding: 3px 6px;
+    }
+    img {
+        width: 180px;
+        height: 280px;
+    }
+    #mainmovie a {
+        text-decoration:none;
+        color:black;
+    }
+    .sty a:hover{
+        color: orangered;
+    }
+    .pageson{
+        background-color: orangered;
+        color:white;
+        padding: 3px 6px;
+        border-radius:40%
+    }
+    .el-menu-item{
+        width: 120px;
+        text-align: center;
+    }
+</style>
+<body style="font-family: 幼圆">
+<div id="app">
+    <el-menu
+            class="el-menu-demo"
+            mode="horizontal"
+            background-color="#545c64"
+            text-color="#fff"
+            active-text-color="#ffd04b">
+        <el-menu-item index="1" ><a href="userMain.html">首页</a></el-menu-item>
+        <el-menu-item index="2" ><a href="movieAll.html">电影</a></el-menu-item>
+        <el-menu-item index="3" ><a href="filmReview.html">影评</a></el-menu-item>
+        <el-menu-item index="4" style="float:right;">个人中心</el-menu-item>
+    </el-menu>
+</div>
+<div id="main" style="width: 90%;margin: auto;margin-top: 20px">
+        <div id="select" style="margin: auto;width: 500px;margin-top: 40px">
+            <el-input v-model="input" placeholder="查找的电影名" style="width: 400px"></el-input>
+            <el-button icon="el-icon-search" @click="selectbyname">搜索</el-button>
+        </div>
+        <div id="style">
+            <div class="sty" style="margin-top: 40px;border-bottom: none">
+                <div style="margin: 15px">
+                    <p style="float: left">类型:</p>
+                    <ul style="margint-top: 20px;">
+                        <li v-for="item in style" style="margin-top:15px"
+                            @click="myClickstyle(item.name)" :class="{pageson:item.name == thisstyle}">
+                            <a>{{item.name}}</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="sty" style="border-bottom: none">
+                <div style="margin: 15px">
+                    <p style="float: left">区域:</p>
+                    <ul>
+                        <li v-for="item in local" style="margin-top:15px"
+                            @click="myClicklocal(item.name)" :class="{pageson:item.name == thislocal}">
+                            <a>{{item.name}}</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="sty">
+                <div style="margin: 15px">
+                    <p style="float: left">年代:</p>
+                    <ul>
+                        <li v-for="item in year" style="margin-top:15px"
+                            @click="myClickyear(item.name)" :class="{pageson:item.name == thisyear}">
+                            <a>{{item.name}}</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div id="mainmovie" style="margin-top: 20px;width: 100%">
+                <ul style="width: 90%;float: left;margin-left: 45px">
+                    <li v-for="subject in subjects" :key="subject.id" >
+                        <div @click="tothemovie(subject.id)">
+                        <img :src="subject.page" alt="" ><br />
+                        电影名： {{subject.name}}<br />
+                        评分： {{subject.rate}}<br />
+                        <!-- 链接： {{subject.url}}<br /> -->
+                        ID： {{subject.id}}<br />
+                        </div>
+                    </li>
+                    <el-pagination
+                            :page-size="10"
+                            :pager-count="11"
+                            layout="prev, pager, next"
+                            :current-page="pagename"
+                            :total="count">
+                    </el-pagination>
+                </ul>
+        </div>
+    </div>
+
+</body>
+<script>
+    var vue=new Vue({
+        el:'#app',
+    })
+    var vue = new Vue({
+        el:'#main',
+        data:{
+            subjects: [], <!-- 9 -->
+            input:'',
+            label:'',
+            pagename:1,
+            count:'',
+            style:[],
+            local:[],
+            year:[],
+            thisstyle:'全部',
+            thislocal:'全部',
+            thisyear:'全部'
+        },
+        methods:{
+            getallmovie(){
+                var params = new URLSearchParams()
+                params.append("mname",this.input)
+                params.append("label",this.label)
+                params.append("pagename",this.pagename)
+                axios.post("usergetallmovie",params).then(d=>{
+                    this.subjects = d.data.data;
+                })
+            },
+            getalllabel(){
+                var params = new URLSearchParams()
+                axios.post("getalllabel",params).then(d=>{
+                    var label = d.data.data;
+                    this.year.push({name:"全部",type:"年代"})
+                    this.style.push({name:"全部",type:"类型"})
+                    this.local.push({name:"全部",type:"区域"})
+                    for(item in label){
+                        if (label[item].type == '年代') this.year.push(label[item])
+                        if (label[item].type == '类型') this.style.push(label[item])
+                        if (label[item].type == '区域') this.local.push(label[item])
+                    }
+                })
+            },
+            getcount(){
+                var params = new URLSearchParams();
+                axios.post("getintmovie",params).then(d=>{
+                    this.count = d.data;
+                })
+            },
+            selectbyname(){
+                var params = new URLSearchParams()
+                this.thislocal='全部'
+                this.thisyear='全部'
+                this.thisstyle='全部'
+                params.append("mname",this.input)
+                params.append("style",this.thisstyle)
+                params.append("local",this.thislocal)
+                params.append("year",this.thisyear)
+                axios.post("getmoviebyname",params).then(d=>{
+                    this.subjects = d.data.data;
+                })
+                axios.post("getmoviecount",params).then(d=>{
+                    this.count = d.data;
+                })
+            },
+            myClicklocal(index){
+                this.thislocal=index;
+                this.selectbylabel();
+            },
+            myClickstyle(index){
+                this.thisstyle=index;
+                this.selectbylabel();
+            },
+            myClickyear(index){
+                this.thisyear=index;
+                this.selectbylabel();
+            },
+            selectbylabel(){
+                var params = new URLSearchParams()
+                this.input=""
+                params.append("mname",this.input)
+                params.append("style",this.thisstyle)
+                params.append("local",this.thislocal)
+                params.append("year",this.thisyear)
+                axios.post("getmoviebyname",params).then(d=>{
+                    this.subjects = d.data.data;
+                    console.log(this.subjects)
+                })
+                axios.post("getmoviecount",params).then(d=>{
+                    this.count = d.data;
+                })
+            },
+            tothemovie(id){
+                var params = new URLSearchParams()
+                params.append("id",id)
+                axios.post("atributethemovie",params).then(d=>{
+                    window.location.href="FilmMain.html"
+                })
+            }
+        },
+        mounted:function(){
+            this.getallmovie();
+            this.getalllabel();
+            this.getcount();
+        }
+    })
+</script>
+</html>

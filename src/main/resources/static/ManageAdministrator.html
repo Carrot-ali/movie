@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+  <script src="js/jquery-1.9.1.js"></script>
+  <script src="js/vue.js"></script>
+  <script src="js/axios.js"></script>
+  <!-- 引入样式 -->
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+  <!-- 引入组件库 -->
+  <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+</head>
+<style>
+    #all{
+        height: 630px;
+    }
+    #image{
+        float: right;
+        margin-right: 40px;
+        margin-top: 40px;
+    }
+    body{
+        font-family: 幼圆;
+    }
+    .avatar-uploader .el-upload {
+        border: 1px dashed #d9d9d9;
+        border-radius: 6px;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+    .avatar-uploader .el-upload:hover {
+        border-color: #409EFF;
+    }
+    .avatar-uploader-icon {
+        font-size: 28px;
+        color: #8c939d;
+        width: 178px;
+        height: 178px;
+        line-height: 178px;
+        text-align: center;
+    }
+    .avatar {
+        width: 178px;
+        height: 178px;
+        display: block;
+    }
+</style>
+<body >
+<div id="all">
+    <div id="main">
+        <div style="float:left;width: 450px;height: 232px;margin-left: 200px;margin-top: 40px">
+            <el-row style="height: 50px;">
+                员&nbsp;&nbsp;工id：
+                <el-input
+                        style="width: 250px"
+                        v-model="manager.id"
+                        :disabled="true">
+                </el-input>
+            </el-row>
+            <el-row style="height: 50px;">
+                密&nbsp;&nbsp;&nbsp;&nbsp;码：
+                <el-input
+                        style="width: 250px"
+                        v-model="manager.password"
+                        :disabled="true"
+                        show-password
+                >
+                </el-input>
+                <el-link type="primary" style="margin-left: 20px">修改密码</el-link>
+            </el-row>
+            <el-row  style="height: 50px;">
+                姓&nbsp;&nbsp;&nbsp;&nbsp;名：
+                <el-input
+                        style="width: 250px"
+                        v-model="manager.managername"
+                        :disabled="true">
+                </el-input>
+            </el-row>
+            <el-row style="height: 45px;">
+                性&nbsp;&nbsp;&nbsp;&nbsp;别：
+                <el-radio disabled v-model="manager.sex" label="男">男</el-radio>
+                <el-radio disabled v-model="manager.sex" label="女">女</el-radio>
+            </el-row>
+            <el-row>
+                权限等级：
+                <el-input
+                        style="width: 250px"
+                        v-model="manager.permission"
+                        :disabled="true">
+                </el-input>
+            </el-row>
+        </div>
+        <div id="image" style="margin-top: 90px;margin-right: 200px">
+            <el-upload
+                    class="avatar-uploader"
+                    action="https://jsonplaceholder.typicode.com/posts/"
+                    :show-file-list="false"
+                    :on-success="handleAvatarSuccess"
+                    :before-upload="beforeAvatarUpload">
+                <img v-if="manager.squareurl" :src="manager.squareurl" class="avatar">
+                <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+            </el-upload>
+        </div>
+        <div style="float:left;width: 600px;height: 260px;margin-left: 200px;margin-top: 20px">
+            <el-row style="height: 60px;">
+                邮&nbsp;&nbsp;&nbsp;&nbsp;箱：
+                <el-input v-model="manager.email" style="width: 350px"></el-input>
+            </el-row>
+            <el-row style="height: 60px;">
+                联系方式：
+                <el-input v-model="manager.phone" style="width: 350px"></el-input>
+            </el-row>
+            <el-row style="height: 60px;">
+                部门名称：
+                <el-input
+                        style="width: 350px"
+                        v-model="manager.department"
+                        :disabled="true">
+                </el-input>
+            </el-row>
+            <el-row style="height: 60px;">
+                家庭住址：
+                <el-input
+                        style="width: 350px"
+                        type="textarea"
+                        :rows="2"
+                        v-model="manager.textarea">
+                </el-input>
+            </el-row>
+        </div>
+        <div  style="float:left;margin-left: 450px;margin-top: 25px">
+            <el-button plain @click="remove">重置修改</el-button>
+            <el-button type="info" @click="save" plain style="margin-left: 70px">保存修改</el-button>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+  var vue = new Vue({
+    el:'#main',
+    data:{
+        manager:[],
+        oldmanager:[]
+    },
+    methods:{
+        save(){
+            var param = new URLSearchParams();
+            /**param.append("working",JSON.parse(JSON.stringify(this.manager)))**/
+            param.append("id",this.manager.id)
+            param.append("email",this.manager.email)
+            param.append("phone",this.manager.phone)
+            param.append("textarea",this.manager.textarea)
+            axios.post("updatework",param).then(d=>{
+                if (d.data == 1){
+                    this.$message("修改成功")
+                }else {
+                    this.$message("修改发生错误,请检查输入信息")
+                }
+            })
+        },
+        getwork(){
+            var param = new URLSearchParams();
+            axios.post("getwork",param).then(d=>{
+                this.manager=d.data.data[0];
+                this.oldmanager=JSON.parse(JSON.stringify(this.manager));
+            })
+        },
+        remove(){
+            this.manager=JSON.parse(JSON.stringify(this.oldmanager));
+            this.$message("信息已重置")
+        },
+        handleAvatarSuccess(res, file) {
+            this.imageUrl = URL.createObjectURL(file.raw);
+        },
+        beforeAvatarUpload(file) {
+            const isJPG = file.type === 'image/jpeg';
+            const isLt2M = file.size / 1024 / 1024 < 2;
+
+            if (!isJPG) {
+                this.$message.error('上传头像图片只能是 JPG 格式!');
+            }
+            if (!isLt2M) {
+                this.$message.error('上传头像图片大小不能超过 2MB!');
+            }
+            return isJPG && isLt2M;
+        }
+    },
+      mounted:function (){
+        this.getwork();
+      }
+  })
+</script>
+</html>
